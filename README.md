@@ -27,3 +27,15 @@ netstat -ibn
 - *如Server不是64位，网卡存储值为Byte值，其它设备为KB，php的int32非常容易越界。Client没关系不依赖数学计算，能读取到数据自然可以上传。*
 - *数据存储为每五分钟一次，在此期间自动更新为最新数据。特定设备的统计图表，其值是时间周期内的平均值。*
 - *服务器名显示优先级为$conf['alias']自定义，Client上传服务器名，程序设备的唯一编号sid。*
+  
+  
+**ScreenShot**  
+*服务器列表*  
+![](https://raw.githubusercontent.com/tianpu/monitor/master/screenshot/servlist.png)
+  
+*设备列表*  
+![](https://raw.githubusercontent.com/tianpu/monitor/master/screenshot/devlist.png)
+  
+*设备统计*  
+![](https://raw.githubusercontent.com/tianpu/monitor/master/screenshot/devinfo.png)
+
