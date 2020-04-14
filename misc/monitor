@@ -1,0 +1,216 @@
+#!/usr/bin/env php
+<?php
+date_default_timezone_set('UTC');
+function monitor_post($raw){
+	global $serv;
+	$r = '';
+	$c = curl_init();
+	curl_setopt($c,CURLOPT_URL,$serv);
+	curl_setopt($c,CURLOPT_POST,true);
+	curl_setopt($c,CURLOPT_POSTFIELDS,'data='.rawurlencode(serialize($raw)));
+	curl_setopt($c,CURLOPT_RETURNTRANSFER,true);
+	curl_setopt($c,CURLOPT_ENCODING,'gzip,deflate');
+	curl_setopt($c,CURLOPT_TIMEOUT,9);
+	$r = curl_exec($c);
+	if(!$r){
+		echo 'erro: '.curl_error($c).PHP_EOL;
+	}
+	else{
+		if(strstr($r,'okay')){
+			echo 'sync okay'.PHP_EOL;
+		}
+		else{
+			echo 'sync fail'.PHP_EOL;
+			echo strip_tags($r).PHP_EOL;
+		}
+	}
+	curl_close($c);
+	return $r;
+}
+function monitor_cmd($str){
+	$r = [];
+	exec($str,$s);
+	if(!empty($s)){
+		$r = $s;
+	}
+	return $r;
+}
+function monitor_os($str){
+	$r = '';
+	$s = monitor_cmd($str);
+	$r = trim($s[0]);
+	return $r;
+}
+function monitor_kern($str){
+	$r = [];
+	$s = monitor_cmd($str);
+	$o = [
+		'hw.model'=>'cpu',
+		'kern.smp.cpus'=>'cpucore',
+		'dev.cpu.0.freq'=>'cpufreq',
+		'kern.hostname'=>'hostname',
+		'kern.openfiles'=>'file',
+		'kern.maxfiles'=>'filemax',
+		'kern.ipc.numopensockets'=>'sock',
+		'kern.ipc.maxsockets'=>'sockmax',
+		'virtual.numopenproc'=>'proc',
+		'kern.maxproc'=>'procmax',
+		'virtual.numopenconn'=>'conn',
+		'kern.ipc.soacceptqueue'=>'connmax'
+	];
+	$d = [];
+	preg_match_all('/^([0-9a-z\.]+): (.+)$/im',implode(PHP_EOL,$s),$t);
+	if(!empty($t[0])){
+		foreach(array_keys($t[0]) as $k){
+			$d[($t[1][$k])] = $t[2][$k];
+		}
+	}
+	$d['virtual.numopenproc'] = monitor_cmd('ps axc | wc -l')[0];
+	$d['virtual.numopenconn'] = monitor_cmd('netstat -an4 | wc -l')[0];
+	foreach(array_keys($o) as $k){
+		$r[($o[$k])] = trim($d[$k]);
+	}
+	return $r;
+}
+function monitor_resc($str){
+	$r = [];
+	$s = monitor_cmd($str);
+	$o = [];
+	foreach(array_keys($s) as $k){
+		$n = strtolower(explode(':',$s[$k],2)[0]);
+		if(!empty($n) && strlen($n)<9){
+			if($n=='arc'){
+				$o[$n] = $s[$k].' '.$s[($k+1)];
+			}
+			else{
+				$o[$n] = $s[$k];
+			}
+		}
+	}
+	preg_match('/^last pid:([\d\s\.]+);  load averages:([\d\s\.]+),([\d\s\.]+),([\d\s\.]+) up ([\d\+\s\:]+) ([\d\+\s\:]+)$/im',$o['last pid'],$d);
+	if(!empty($d[1])){
+		$r['pid'] = trim($d[1]);
+		$r['time'] = date('Y-m-d').' '.trim($d[6]);
+		$r['uptime'] = trim($d[5]);
+		$r['load'] = [
+			'1m'=>trim($d[2]),
+			'5m'=>trim($d[3]),
+			'15m'=>trim($d[4])
+		];
+	}
+	$r['mem'] = [];
+	preg_match_all('/ ([\d]+)(K|M|G) (Active|Inact|Laundry|Wired|Buf|Free)/i',$o['mem'],$d);
+	if(!empty($d[0])){
+		foreach(array_keys($d[3]) as $k){
+			$n = strtolower($d[3][$k]);
+			$u = strtolower($d[2][$k]);
+			if($u=='k'){
+				$v = $d[1][$k]*1;
+			}
+			elseif($u=='g'){
+				$v = $d[1][$k]*1024*1024;
+			}
+			else{
+				$v = $d[1][$k]*1024;
+			}
+			$r['mem'][$n] = $v;
+		}
+	}
+	$r['zarc'] = [];
+	preg_match_all('/ ([\d]+)(K|M|G) (Total|MRU|MFU|Anon|Header|Other|Compressed|Uncompressed)/i',$o['arc'],$d);
+	if(!empty($d[0])){
+		foreach(array_keys($d[3]) as $k){
+			$n = strtolower($d[3][$k]);
+			$u = strtolower($d[2][$k]);
+			if($u=='k'){
+				$v = $d[1][$k]*1;
+			}
+			elseif($u=='g'){
+				$v = $d[1][$k]*1024*1024;
+			}
+			else{
+				$v = $d[1][$k]*1024;
+			}
+			$r['zarc'][$n] = $v;
+		}
+		$r['zarc']['ratio'] = 0;
+	}
+	$r['swap'] = [];
+	preg_match_all('/ ([\d]+)(K|M|G) (Total|Free|Used|Inuse)/i',$o['swap'],$d);
+	if(!empty($d[0])){
+		foreach(array_keys($d[3]) as $k){
+			$n = strtolower($d[3][$k]);
+			$u = strtolower($d[2][$k]);
+			if($u=='k'){
+				$v = $d[1][$k]*1;
+			}
+			elseif($u=='g'){
+				$v = $d[1][$k]*1024*1024;
+			}
+			else{
+				$v = $d[1][$k]*1024;
+			}
+			$r['swap'][$n] = $v;
+		}
+	}
+	return $r;
+}
+function monitor_disk($str){
+	$r = [];
+	$p = ['','/dev','/proc'];
+	$s = monitor_cmd($str);
+	foreach($s as $v){
+		preg_match('/^([0-9a-z\/]+)[\s]+([\d]+)[\s]+([\d]+)[\s]+([\d]+)[\s]+([\d]+)%[\s]+([\d]+)[\s]+([\d]+)[\s]+([\d]+)%[\s]+([0-9a-z\/]+)$/im',$v,$d);
+		if(!in_array($d[9],$p)){
+			$r[($d[1])] = [
+				'used'=>$d[3],
+				'avail'=>$d[4],
+				'iused'=>$d[6],
+				'ifree'=>$d[7],
+				'mount'=>$d[9]
+			];
+		}
+	}
+	return $r;
+}
+function monitor_inet($str){
+	$r = [];
+	$s = monitor_cmd($str);
+	$p = [];
+	foreach($s as $v){
+		$d = preg_split('/[\s]+/i',$v);
+		$n = strtolower($d[0]);
+		if(preg_match('/((^|\.)(1[0-9]{2}|[1-9][0-9]|[0-9]|2[0-4][0-9]|25[0-5])){4}/',$d[3])){
+			$p[$n][] = $d[3];
+		}
+		if(!empty($d[7]) && !empty($d[10]) && preg_match('/^\<Link#[\d]+\>$/',$d[2])){
+			$r[$n] = [
+				'txin'=>$d[7],
+				'txinrate'=>0,
+				'txout'=>$d[10],
+				'txoutrate'=>0,
+				'timestamp'=>0,
+				'addr'=>''
+			];
+		}
+	}
+	foreach(array_keys($r) as $k){
+		if(!empty($p[$k])){
+			$r[$k]['addr'] = $p[$k][0];
+		}
+	}
+	return $r;
+}
+$serv = '{SERVER_URI}';
+$meta = [
+	'os'=>'uname -mrs',
+	'kern'=>'sysctl -a',
+	'resc'=>'top -n',
+	'disk'=>'df -ik',
+	'inet'=>'netstat -ibn'
+];
+$data = [];
+foreach(array_keys($meta) as $k){
+	$data[$k] = ('monitor_'.$k)($meta[$k]);
+}
+monitor_post($data);
