@@ -1,0 +1,262 @@
+div,span,a,h1,h2,html,body {
+	-webkit-tap-highlight-color:transparent;
+	margin:0;
+	padding:0;
+	border:0;
+	outline:0;
+}
+body {
+	font:14px/20px monospace;
+	color:darkslategray;
+	display:block;
+	min-height:100%;
+	min-width:320px;
+	background:#e8e8e8;
+}
+a {
+	background-color:transparent;
+	text-decoration:none;
+	cursor:pointer;
+	color:darkslategray;
+}
+a:hover,.link>a:hover {
+	text-decoration:underline;
+	color:#e47911;
+}
+.bold {
+	font-weight:bold;
+	font-size:1.2em;
+}
+.header {
+	text-align:center;
+	background:linear-gradient(#f2f2f2,#e2e2e2);
+	box-shadow:0px 2px 3px rgba(0,0,0,0.1);
+}
+.header > .site {
+	font-size:20px;
+	padding:15px 0;
+}
+.footer {
+	padding-bottom:7px;
+	text-align:center;
+	color:silver;
+}
+.footer > .reload {
+	text-align:center;
+}
+.footer > .reload > a {
+	text-decoration:none;
+	color:gray;
+	margin:0 3px;
+}
+.footer > .reload > a:hover {
+	text-decoration:underline;
+}
+.wrapper {
+	max-width:980px;
+	min-height:90px;
+	margin:0px auto;
+	padding:10px 5px;
+}
+.servlist {
+	display:flex;
+	flex-flow:row wrap;
+}
+.inner {
+	min-width:300px;
+}
+.inner.full {
+	width:100%;
+}
+@media (max-width:960px) {
+	.inner {
+		width:100%;
+	}
+}
+@media (min-width:960px) {
+	.inner {
+		width:50%;
+	}
+}
+.servitem {
+	margin:7px;
+	padding:7px 10px;
+	background:white;
+	border:1px solid transparent;
+	border-radius:5px;
+	box-shadow:0px 2px 3px rgba(0,0,0,0.1);
+}
+.servitem.setup {
+	display:block;
+	unicode-bidi:embed;
+	white-space:pre-line;
+	word-wrap:break-word;
+}
+.shell {
+	background:aliceblue;
+	display:block;
+	padding:10px;
+	margin:10px 0 5px 0;
+}
+.text.green {
+	color:limegreen;
+}
+.text.alert {
+	color:gold;
+}
+.text.error {
+	color:tomato;
+}
+.servitem > .status {
+	color:gray;
+}
+.servitem > .status > .check {
+	font-size:13px;
+	float:right;
+}
+.servitem > .device {
+	color:gray;
+	padding:5px 0 7px 0;
+}
+.servitem > .device > .host {
+	display:inline-block;
+	font-size:18px;
+	padding:3px 7px;
+	background:beige;
+	border:1px solid bisque;
+	border-radius:5px;
+}
+.servitem > .device > .misc {
+	margin-left:7px;
+	padding:2px 7px;
+	font-size:13px;
+	display:inline-block;
+	background:aliceblue;
+}
+.servitem > .network {
+	padding-bottom:3px;
+}
+.servitem > .network > span {
+	padding-right:7px;
+	color:gray;
+}
+.servitem > .network > .delete {
+	float:right;
+	padding:2px 7px;
+	font-size:13px;
+	display:inline-block;
+	background:aliceblue;
+	line-height:15px;
+	border-radius:3px;
+}
+.servitem > .network > span:before {
+	font-size:15px;
+	color:limegreen;
+	padding-right:3px;
+}
+.servitem > .network > .uptime:before {
+	content:"\23f0";
+}
+.servitem > .network > .txout:before {
+	content:"\2963";
+}
+.servitem > .network > .txin:before {
+	content:"\2965";
+}
+.ratebar {
+	clear:both;
+	padding-top:7px;
+}
+.ratebar > .name {
+	float:left;
+	width:45px;
+	text-align:right;
+	padding:5px 0;
+	color:silver;
+	display:block;
+}
+.ratebar > .value {
+	margin-left:50px;
+	display:block;
+	text-indent:7px;
+	color:dimgray;
+}
+.ratebar > .value.width {
+	border:1px solid bisque;
+	background:whitesmoke;
+	position:relative;
+}
+.ratebar > .value > .tips {
+	font-size:13px;
+	position: absolute;
+	top:5px;
+	right:7px;
+	color:gray;
+}
+.servstat {
+	margin-top:15px;
+	border-top:1px solid aliceblue;
+	min-width:300px;
+	width:100%;
+	overflow:hidden;
+}
+.servstat > .ratebar:first-child {
+	padding:5px 10px;
+	background:aliceblue;
+	text-align:center;
+}
+.servstat > .ratebar > .interval {
+	font-size:14px;
+	padding-right:10px;
+}
+.servstat > .ratebar > .interval > a > .tips {
+	vertical-align:super;
+	font-size:12px;
+	font-weight:normal;
+	color:gray;
+	padding-left:1px;
+}
+.width > .green {
+	display:block;
+	padding:5px 0;
+	background:rgba(50,205,50,0.3);
+}
+.width > .alert {
+	display:block;
+	padding:5px 0;
+	background:rgba(255,215,0,0.3);
+}
+.width > .error {
+	display:block;
+	padding:5px 0;
+	background:rgba(255,99,71,0.3);;
+}
+.form {
+	clear:both;
+	margin:5px 10px 0 0;
+	width:auto;
+}
+.form-input {
+	border:1px solid bisque;
+	border-radius:3px;
+	outline:none;
+	font-weight:normal;
+	vertical-align:top;
+	padding:1px 5px;
+	overflow:auto;
+	width:100%;
+}
+.form-submit {
+	background:linear-gradient(beige,bisque);
+	border:1px solid bisque;
+	border-radius:3px;
+	outline:none;
+	font-weight:normal;
+	text-align:center;
+	vertical-align:top;
+	padding:5px 15px;
+	cursor:pointer;
+}
+.form-submit:hover {
+	background:bisque;
+}
