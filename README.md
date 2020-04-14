@@ -19,7 +19,7 @@ netstat -ibn
 
 **基本思路**  
 *假设所有代码上传到https://www.example.org/*  
-*1. 配置。设置conf.php的$conf['auth']和$conf['mysql']两个字段。如有必要自定义$conf['alias']字段，是key为IP地址value为服务器名的自定义字段。*  
+*1. 配置。设置conf.php的$conf['auth']和$conf['mysql']两个字段，把/misc/monitor.sql导入到数据库里。。如有必要自定义$conf['alias']字段，是key为IP地址value为服务器名的自定义字段。*  
 *2. 安装。打开https://www.example.org/?action=install 按照屏幕提示安装。*  
 *3. 删除。打开https://www.example.org/?action=delete&sid={sid} 删除历史数据，如服务器不是100%在线，会在界面上主动显示删除链接。*  
   
